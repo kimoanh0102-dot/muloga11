@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Kiểm Tra Toán Học: Mũ - Logarit</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- MathJax Configuration and Script -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            svg: { 
+                fontCache: 'global',
+                scale: 1.25 // Tăng kích thước công thức Toán lên 25%
+            },
+            startup: {
+                typeset: false // We will manually trigger typesetting
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <style>
+        /* Anti-cheat CSS: Disable text selection */
+        body {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        
+        /* Hide scrollbar for question palette */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Smooth transitions */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Option selection styling */
+        .option-btn {
+            transition: all 0.2s;
+        }
+        .option-btn.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+        .option-btn:hover:not(.selected) {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans" oncontextmenu="return false;">
+
+    <!-- WARNING MODAL (Anti-cheat) -->
+    <div id="warningModal" class="fixed inset-0 bg-red-900 bg-opacity-90 z-50 hidden flex items-center justify-center fade-in">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md text-center">
+            <i class="fa-solid fa-triangle-exclamation text-5xl text-red-500 mb-4"></i>
+            <h2 class="text-2xl font-bold text-red-600 mb-2">CẢNH BÁO GIAN LẬN!</h2>
+            <p id="warningText" class="text-slate-600 mb-6">Hệ thống phát hiện bạn vừa chuyển tab hoặc thu nhỏ trình duyệt. Hành động này đã được ghi nhận.</p>
+            <button onclick="closeWarning()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">Tôi đã hiểu</button>
+        </div>
+    </div>
+
+    <!-- SUBMIT CONFIRMATION MODAL -->
+    <div id="submitModal" class="fixed inset-0 bg-slate-900 bg-opacity-75 z-50 hidden flex items-center justify-center fade-in">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 text-center">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                <i class="fa-solid fa-paper-plane"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Xác nhận nộp bài</h2>
+            
+            <div id="submitModalContent">
+                <p id="submitModalText" class="text-slate-600 mb-6">Bạn có chắc chắn muốn nộp bài?</p>
+                <div class="flex gap-3 justify-center">
+                    <button onclick="closeSubmitModal()" class="px-5 py-2.5 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy bỏ</button>
+                    <button onclick="confirmSubmit()" class="px-5 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-colors">Đồng ý nộp</button>
+                </div>
+            </div>
+
+            <div id="submitLoading" class="hidden flex-col items-center justify-center py-4">
+                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-600 mb-4"></i>
+                <p class="text-slate-600 font-medium">Đang lưu kết quả bài làm...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- HEADER -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b pb-4 border-slate-200 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2 rounded-lg">
+                    <i class="fa-solid fa-square-root-variable text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-800">Kiểm Tra Mũ - Logarit</h1>
+                    <p id="studentInfoHeader" class="text-sm text-slate-500 font-medium hidden mt-1">
+                        <i class="fa-solid fa-user-graduate mr-1"></i> <span id="headerName"></span> | <i class="fa-solid fa-users-rectangle mr-1"></i> <span id="headerClass"></span>
+                    </p>
+                </div>
+            </div>
+            <div id="statusBadge" class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-clock"></i> Chưa bắt đầu
+            </div>
+        </header>
+
+        <!-- SCREEN 1: INTRO -->
+        <div id="introScreen" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-10 fade-in text-center">
+            <img src="https://cdn-icons-png.flaticon.com/512/3750/3750014.png" alt="Math" class="w-24 h-24 mx-auto mb-6 opacity-80">
+            <h2 class="text-2xl font-bold mb-2">Chào mừng đến với bài kiểm tra!</h2>
+            <p class="text-slate-500 mb-8">Vui lòng điền thông tin của bạn để bắt đầu.</p>
+
+            <!-- Bổ sung form điền thông tin -->
+            <div class="max-w-md mx-auto mb-8 bg-slate-50 p-6 rounded-xl border border-slate-200 text-left">
+                <div class="mb-4">
+                    <label for="studentName" class="block text-sm font-bold text-slate-700 mb-2">Họ và tên thí sinh <span class="text-red-500">*</span></label>
+                    <input type="text" id="studentName" placeholder="VD: Nguyễn Văn A" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                    <label for="studentClass" class="block text-sm font-bold text-slate-700 mb-2">Lớp <span class="text-red-500">*</span></label>
+                    <input type="text" id="studentClass" placeholder="VD: 11A1" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                <p id="loginError" class="text-red-500 text-sm mt-3 font-medium hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i> Vui lòng nhập đầy đủ Họ tên và Lớp!</p>
+            </div>
+
+            <div class="text-left bg-blue-50 p-6 rounded-xl mb-8 max-w-2xl mx-auto">
+                <h3 class="font-bold text-blue-800 mb-2"><i class="fa-solid fa-circle-info mr-2"></i>Quy chế thi:</h3>
+                <ul class="list-disc list-inside text-blue-700 space-y-2">
+                    <li>Đề thi gồm <b>20 câu hỏi</b> được chọn ngẫu nhiên từ ngân hàng 34 câu.</li>
+                    <li>Mỗi câu đúng được <b>1 điểm</b>.</li>
+                    <li><b>Nghiêm cấm:</b> Sao chép nội dung, click chuột phải.</li>
+                    <li><b>Nghiêm cấm:</b> Chuyển sang Tab khác hoặc mở ứng dụng khác. Hệ thống sẽ cảnh báo và ghi nhận vi phạm.</li>
+                </ul>
+            </div>
+            <button onclick="startGame()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform transform hover:scale-105 text-lg w-full sm:w-auto">
+                <i class="fa-solid fa-play mr-2"></i> Bắt đầu làm bài
+            </button>
+        </div>
+
+        <!-- SCREEN 2: PLAYING -->
+        <div id="playingScreen" class="hidden fade-in">
+            <!-- Progress & Stats -->
+            <div class="flex justify-between items-end mb-4">
+                <div>
+                    <span class="text-sm text-slate-500 font-semibold">Câu hỏi <span id="currentQNum" class="text-blue-600 text-lg">1</span> / 20</span>
+                </div>
+                <div id="cheatCounter" class="text-xs font-semibold text-red-500 bg-red-100 px-2 py-1 rounded hidden">
+                    Vi phạm: <span id="cheatCountVal">0</span>
+                </div>
+            </div>
+            
+            <!-- Question Palette (1-10 on one row) -->
+            <div id="questionPalette" class="flex flex-wrap gap-2 mb-6 justify-center sm:justify-start">
+                <!-- Javascript will inject 10 buttons here -->
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 rounded-full h-2.5 mb-8">
+                <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 10%"></div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 mb-6">
+                <!-- Đổi h3 thành div, thêm text-justify, leading-loose và break-words để văn bản dàn đều không rớt dòng -->
+                <div id="questionText" class="text-lg sm:text-xl font-medium text-slate-800 mb-8 leading-loose text-justify break-words w-full">
+                    <!-- Question will be injected here -->
+                </div>
+                
+                <div id="optionsContainer" class="flex flex-col gap-3 w-full">
+                    <!-- Options will be injected here -->
+                </div>
+            </div>
+
+            <!-- Navigation Controls -->
+            <div class="flex justify-between items-center">
+                <button onclick="prevQuestion()" id="prevBtn" class="px-6 py-2 rounded-lg font-semibold text-slate-600 bg-slate-200 hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Câu trước
+                </button>
+                
+                <button onclick="nextQuestion()" id="nextBtn" class="px-6 py-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                    Câu tiếp <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+                
+                <button onclick="submitExamConfirmation()" id="submitBtn" class="hidden px-6 py-2 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 shadow-md transition-colors">
+                    Nộp bài <i class="fa-solid fa-check ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: RESULTS -->
+        <div id="resultScreen" class="hidden fade-in">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center mb-8">
+                <div id="scoreIcon" class="text-6xl mb-4">🏆</div>
+                <h2 class="text-3xl font-bold text-slate-800 mb-2">Hoàn thành bài thi!</h2>
+                
+                <!-- Hiển thị tên học sinh trên bảng điểm -->
+                <div class="bg-blue-50 text-blue-800 inline-block px-4 py-2 rounded-lg font-semibold mb-6 border border-blue-100">
+                    <span id="resultName"></span> - Lớp: <span id="resultClass"></span>
+                </div>
+                
+                <div class="block">
+                    <div class="inline-block bg-slate-50 border-2 border-slate-100 rounded-2xl p-6 px-10">
+                        <p class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">Điểm số của bạn</p>
+                        <div class="text-5xl font-black text-blue-600">
+                            <span id="finalScore">0</span><span class="text-3xl text-slate-300">/20</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="resultWarnings" class="mt-6 text-sm text-red-500 font-semibold hidden">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Hệ thống ghi nhận bạn đã vi phạm quy chế <span id="finalCheatCount"></span> lần. Báo cáo đã được lưu lại.
+                </div>
+            </div>
+
+            <h3 class="text-xl font-bold mb-4 px-2">Chi tiết bài làm:</h3>
+            <div id="reviewContainer" class="space-y-4">
+                <!-- Review cards will be injected here -->
+            </div>
+            
+            <div class="mt-8 text-center">
+                <button onclick="location.reload()" class="text-blue-600 font-semibold hover:underline">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Làm lại bài thi mới
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        // Ngân hàng câu hỏi trích xuất từ PDF (Đã chuẩn hóa 100% LaTeX)
+        const fullQuestionBank = [
+            {
+                q: "Với các số thực $a, b$ bất kỳ, mệnh đề nào dưới đây đúng?",
+                o: ["$\\frac{5^{a}}{5^{b}}=5^{a-b}$", "$\\frac{5^{a}}{5^{b}}=5^{\\frac{a}{b}}$", "$\\frac{5^{a}}{5^{b}}=5^{ab}$", "$\\frac{5^{a}}{5^{b}}=5^{a+b}$"],
+                a: 0
+            },
+            {
+                q: "Cho $a$ là số thực dương khác $1$. Mệnh đề nào dưới đây đúng với mọi số dương $x, y$?",
+                o: ["$\\log_{a}\\frac{x}{y}=\\log_{a}x-\\log_{a}y$", "$\\log_{a}\\frac{x}{y}=\\log_{a}(x-y)$", "$\\log_{a}\\frac{x}{y}=\\log_{a}x+\\log_{a}y$", "$\\log_{a}\\frac{x}{y}=\\frac{\\log_{a}x}{\\log_{a}y}$"],
+                a: 0
+            },
+            {
+                q: "Cho $a$ là số thực dương; $m, n$ là những số thực tùy ý. Khẳng định nào sau đây đúng?",
+                o: ["$a^{m}+a^{n}=a^{m+n}$", "$a^{m}\\cdot a^{n}=a^{m-n}$", "$(a^{m})^{n}=(a^{n})^{m}$", "$\\frac{a^{m}}{a^{n}}=a^{n-m}$"],
+                a: 2
+            },
+            {
+                q: "Cho biểu thức $A=\\log_{\\frac{1}{3}}5+2\\log_{9}25-\\log_{\\sqrt{3}}5$. Giá trị của $A$ bằng",
+                o: ["$\\log_{3}5$", "$\\log_{3}25$", "$\\log_{\\frac{1}{3}}25$", "$-\\log_{3}5$"],
+                a: 3
+            },
+            {
+                q: "Cho $a$ là số thực dương khác $1$. Tính $I=\\log_{\\sqrt{a}}a.$",
+                o: ["$I=-2$", "$I=2$", "$I=\\frac{1}{2}$", "$I=0$"],
+                a: 1
+            },
+            {
+                q: "Cho $a$ là số thực dương. Giá trị rút gọn của biểu thức $P=a^{\\frac{4}{3}}\\sqrt{a}$ bằng",
+                o: ["$a^{\\frac{7}{3}}$", "$a^{\\frac{5}{6}}$", "$a^{\\frac{11}{6}}$", "$a^{\\frac{10}{3}}$"],
+                a: 2
+            },
+            {
+                q: "Với $a>1$, biểu thức $P=a^{2}\\sqrt{a^{9}}$ thu gọn được kết quả nào dưới đây?",
+                o: ["$a^{\\frac{13}{2}}$", "$a^{\\frac{1}{2}}$", "$a^{\\frac{15}{4}}$", "$a^{\\frac{17}{13}}$"],
+                a: 0
+            },
+            {
+                q: "Giá trị của $\\log_{\\frac{1}{a}}\\sqrt[3]{a^{7}}$, bằng",
+                o: ["$-\\frac{7}{3}$", "$\\frac{2}{3}$", "$\\frac{5}{3}$", "$4$"],
+                a: 0
+            },
+            {
+                q: "Rút gọn biểu thức $P=3^{2\\log_{3}a}-\\log_{5}a^{2}\\cdot\\log_{a}25$, với $a$ là số thực dương khác $1$ ta được",
+                o: ["$P=a^{2}+4$", "$P=a^{2}-4$", "$P=a^{2}+2$", "$P=a^{2}-2$"],
+                a: 1
+            },
+            {
+                q: "Hàm số nào dưới đây có tập xác định là $\\mathbb{R}$?",
+                o: ["$y=2^{x}$", "$y=\\log_{2}x$", "$y=3^{\\sqrt{x}}$", "$y=\\ln(1+x)$"],
+                a: 0
+            },
+            {
+                q: "Hàm số nào dưới đây nghịch biến trên $\\mathbb{R}$?",
+                o: ["$y=\\left(\\frac{5}{2}\\right)^{x}$", "$y=\\log_{0,2}x$", "$y=\\log_{2}x$", "$y=\\left(\\frac{e}{5}\\right)^{x}$"],
+                a: 3
+            },
+            {
+                q: "Hàm số nào sau đây đồng biến trên $\\mathbb{R}$?",
+                o: ["$f(x)=\\left(\\frac{\\pi}{4}\\right)^{x}$", "$f(x)=\\left(\\frac{1}{2}\\right)^{x}$", "$f(x)=5^{x}$", "$f(x)=\\left(\\frac{2}{5}\\right)^{x}$"],
+                a: 2
+            },
+            {
+                q: "Cho hàm số $y=\\left(\\frac{1}{2}\\right)^{x}.$ Khẳng định nào sau đây sai?",
+                o: ["Tập giá trị của hàm số là $(0;+\\infty)$", "Tập xác định của hàm số là $\\mathbb{R}$", "Đồ thị của hàm số cắt trục hoành tại đúng 1 điểm", "Hàm số nghịch biến trên tập xác định của nó"],
+                a: 2
+            },
+            {
+                q: "Hàm số nào sau đây có tập xác định là $\\mathbb{R}$?",
+                o: ["$y=(x-1)^{\\frac{1}{3}}$", "$y=2023^{\\frac{1}{x}}$", "$y=\\frac{1}{5^{x}}$", "$y=\\ln|x|$"],
+                a: 2
+            },
+            {
+                q: "Hàm số nào dưới đây đồng biến trên $\\mathbb{R}$?",
+                o: ["$y=\\log_{2}x$", "$y=\\left(\\frac{\\sqrt{5}}{2}\\right)^{x}$", "$y=\\left(\\frac{1}{2}\\right)^{x}$", "$y=\\log(2x+1)$"],
+                a: 1
+            },
+            {
+                q: "Tập xác định của hàm số $y=\\log_{3}(x-4)$ là:",
+                o: ["$(-\\infty;4)$", "$(4;+\\infty)$", "$(5;+\\infty)$", "$(-\\infty;+\\infty)$"],
+                a: 1
+            },
+            {
+                q: "Tìm tập xác định của hàm số $y=\\log_{2}(3x-1)$.",
+                o: ["$D=\\left(\\frac{1}{3};+\\infty\\right)$", "$D=\\left(\\frac{1}{3};2\\right)$", "$D=\\left(-\\infty;\\frac{1}{3}\\right)$", "$D=\\left(0;\\frac{1}{3}\\right)$"],
+                a: 0
+            },
+            {
+                q: "Tập xác định của hàm số $y=\\ln(1-2x)$ là",
+                o: ["$\\left(-\\infty;-\\frac{1}{2}\\right)$", "$\\left(\\frac{1}{2};+\\infty\\right)$", "$\\left(-\\infty;\\frac{1}{2}\\right)$", "$\\left(-\\infty;\\frac{1}{2}\\right]$"],
+                a: 2
+            },
+            {
+                q: "Tìm tập xác định $D$ của hàm số $y=\\ln(4-3x-x^{2})$:",
+                o: ["$D=\\left(-\\infty;\\frac{1}{2}\\right)$", "$D=[-4;1]$", "$D=(-4;1)$", "$D=(-\\infty;-4)\\cup(1;+\\infty)$"],
+                a: 2
+            },
+            {
+                q: "Rút gọn biểu thức $P=\\log_{4}(a^{2})+\\log_{4}(a^{4})$ với $a<0$ ta được",
+                o: ["$3\\log_{2}a$", "$-3\\log_{2}(-a)$", "$-3\\log_{2}a$", "$3\\log_{2}(-a)$"],
+                a: 3
+            },
+            {
+                q: "Nghiệm của phương trình $\\log_{3}x=2$ là",
+                o: ["$x=9$", "$x=5$", "$x=6$", "$x=8$"],
+                a: 0
+            },
+            {
+                q: "Nghiệm của phương trình $\\log_{2}(5x)=3$ là:",
+                o: ["$x=\\frac{8}{5}$", "$x=\\frac{9}{5}$", "$x=8$", "$x=9$"],
+                a: 0
+            },
+            {
+                q: "Tập nghiệm thực của phương trình $\\log_{3}(x-1)=2$ là:",
+                o: ["$\\{9\\}$", "$\\{2\\}$", "$\\{10\\}$", "$\\emptyset$"],
+                a: 2
+            },
+            {
+                q: "Nghiệm của phương trình $\\log_{2}x+\\log_{2}3=0$ là",
+                o: ["$x=-3$", "$x=\\frac{1}{8}$", "$x=\\frac{1}{3}$", "$x=3$"],
+                a: 2
+            },
+            {
+                q: "Nghiệm của phương trình $2^{x-1}=8$ là",
+                o: ["$x=3$", "$x=4$", "$x=5$", "$x=2$"],
+                a: 1
+            },
+            {
+                q: "Tập nghiệm $S$ của bất phương trình $\\log_{3}x>2$ là",
+                o: ["$S=[9;+\\infty)$", "$S=(9;+\\infty)$", "$S=(0;9)$", "$S=(-\\infty;9)$"],
+                a: 1
+            },
+            {
+                q: "Tìm tập nghiệm $S$ của bất phương trình $2^{x+2}>4$.",
+                o: ["$(0;+\\infty)$", "$(-2;+\\infty)$", "$(-3;3)$", "$(-1;5)$"],
+                a: 0
+            },
+            {
+                q: "Tập nghiệm $S$ của bất phương trình $3^{x^{2}-3x}\\ge\\frac{1}{9}$ là",
+                o: ["$S=[1;2]$", "$S=(-\\infty;1)\\cup(2;+\\infty)$", "$S=(1;2)$", "$S=(-\\infty;1]\\cup[2;+\\infty)$"],
+                a: 3
+            },
+            {
+                q: "Giải phương trình $(2,5)^{5x-7}=\\left(\\frac{2}{5}\\right)^{x+1}.$",
+                o: ["$x\\ge 1$", "$x=1$", "$x<1$", "$x=2$"],
+                a: 1
+            },
+            {
+                q: "Số nghiệm nguyên của bất phương trình $3^{x^{2}+4x+1}-\\frac{1}{9}\\le0$ bằng",
+                o: ["3", "7", "6", "2"],
+                a: 0
+            },
+            {
+                q: "Biết một nghiệm của phương trình $\\log_{3}(x-1)+\\log_{3}(x-5)=1$ có dạng $x=a+\\sqrt{b}$ (với $a, b \\in \\mathbb{Z}$). Giá trị biểu thức $T=a+b$ là",
+                o: ["$T=5$", "$T=-4$", "$T=10$", "$T=-2$"],
+                a: 2
+            },
+            {
+                q: "Gọi $S$ là tập nghiệm của phương trình $2\\log_{2}(2x-2)+\\log_{2}(x-3)^{2}=2$ trên $\\mathbb{R}.$ Tổng các phần tử của $S$ bằng",
+                o: ["$6+\\sqrt{2}$", "$8+\\sqrt{2}$", "8", "$4+\\sqrt{2}$"],
+                a: 3
+            },
+            {
+                q: "Phương trình $2^{x-2}=3^{x^{2}+2x-8}$ có một nghiệm dạng $x=\\log_{a}b-4$ với $a, b$ là các số nguyên dương thuộc khoảng $(1;5)$. Khi đó $a+2b$ bằng",
+                o: ["6", "14", "9", "7"],
+                a: 3
+            },
+            {
+                q: "Tìm tất cả các giá trị thực của tham số $m$ để hàm số $y=\\log(x^{2}-2mx+4)$ có tập xác định là $\\mathbb{R}$",
+                o: ["$\\left[ \\begin{array}{l} m > 2 \\\\ m < -2 \\end{array} \\right.$", "$m=2$", "$m<2$", "$-2<m<2$"],
+                a: 3
+            }
+        ];
+
+        // System State
+        let gameState = 'intro'; // intro, playing, result
+        let examQuestions = [];
+        let currentIdx = 0;
+        let userAnswers = new Array(20).fill(null);
+        let violations = 0;
+        
+        // Học sinh
+        let studentNameStr = "";
+        let studentClassStr = "";
+
+        // Anti-Cheat: Prevent Copy & Paste
+        document.addEventListener('copy', (e) => {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'C')) {
+                e.preventDefault();
+            }
+        });
+
+        // Anti-Cheat: Tab/Window switching
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden && gameState === 'playing') {
+                violations++;
+                document.getElementById('cheatCountVal').innerText = violations;
+                document.getElementById('cheatCounter').classList.remove('hidden');
+                
+                document.getElementById('warningText').innerText = `Hệ thống phát hiện bạn vừa chuyển tab hoặc thu nhỏ trình duyệt. Lần vi phạm thứ ${violations}.`;
+                document.getElementById('warningModal').classList.remove('hidden');
+                
+                // Nếu vi phạm > 3 lần, tự động thu bài (tùy chọn)
+                // if(violations >= 3) submitExam();
+            }
+        });
+
+        function closeWarning() {
+            document.getElementById('warningModal').classList.add('hidden');
+        }
+
+        // Utils: Shuffle Array
+        function shuffleArray(array) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
+
+        // Bắt đầu game
+        function startGame() {
+            // Lấy thông tin học sinh
+            studentNameStr = document.getElementById('studentName').value.trim();
+            studentClassStr = document.getElementById('studentClass').value.trim();
+
+            if (!studentNameStr || !studentClassStr) {
+                document.getElementById('loginError').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('loginError').classList.add('hidden');
+
+            // Cập nhật Header
+            document.getElementById('headerName').innerText = studentNameStr;
+            document.getElementById('headerClass').innerText = studentClassStr;
+            document.getElementById('studentInfoHeader').classList.remove('hidden');
+
+            // Cập nhật Result Screen
+            document.getElementById('resultName').innerText = studentNameStr;
+            document.getElementById('resultClass').innerText = studentClassStr;
+
+            // Pick random 20 questions
+            let shuffled = shuffleArray([...fullQuestionBank]);
+            examQuestions = shuffled.slice(0, 20);
+            
+            gameState = 'playing';
+            
+            document.getElementById('introScreen').classList.add('hidden');
+            document.getElementById('playingScreen').classList.remove('hidden');
+            document.getElementById('statusBadge').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang làm bài`;
+            document.getElementById('statusBadge').className = "bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2";
+            
+            renderQuestion();
+        }
+
+        // Render danh sách nút bấm các câu hỏi
+        function renderPalette() {
+            const palette = document.getElementById('questionPalette');
+            if (!palette) return;
+            palette.innerHTML = '';
+            for(let i=0; i<20; i++) {
+                const btn = document.createElement('button');
+                btn.className = `w-10 h-10 shrink-0 rounded-full font-bold text-sm transition-colors border-2 flex items-center justify-center ${
+                    currentIdx === i 
+                    ? 'border-blue-600 bg-blue-600 text-white shadow-md' 
+                    : userAnswers[i] !== null 
+                        ? 'border-green-500 bg-green-100 text-green-700' 
+                        : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-100'
+                }`;
+                btn.innerText = i + 1;
+                btn.onclick = () => {
+                    currentIdx = i;
+                    renderQuestion();
+                };
+                palette.appendChild(btn);
+            }
+        }
+
+        // Render câu hỏi hiện tại
+        function renderQuestion() {
+            const qData = examQuestions[currentIdx];
+            
+            // Cập nhật progress bar & số câu
+            document.getElementById('currentQNum').innerText = currentIdx + 1;
+            document.getElementById('progressBar').style.width = `${((currentIdx + 1) / 20) * 100}%`;
+
+            renderPalette();
+
+            // Cập nhật text câu hỏi
+            document.getElementById('questionText').innerHTML = `<b>Câu ${currentIdx + 1}:</b> ${qData.q}`;
+
+            // Cập nhật đáp án
+            const optsContainer = document.getElementById('optionsContainer');
+            optsContainer.innerHTML = '';
+            
+            const labels = ['A', 'B', 'C', 'D'];
+            
+            qData.o.forEach((optText, i) => {
+                const isSelected = userAnswers[currentIdx] === i;
+                
+                const btn = document.createElement('div');
+                btn.className = `option-btn border-2 border-slate-200 rounded-xl p-4 cursor-pointer flex items-center gap-3 ${isSelected ? 'selected' : ''}`;
+                btn.onclick = () => selectOption(i);
+                
+                btn.innerHTML = `
+                    <div class="w-8 h-8 rounded-full flex shrink-0 items-center justify-center font-bold ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'}">
+                        ${labels[i]}
+                    </div>
+                    <div class="flex-1 overflow-x-auto overflow-y-hidden">${optText}</div>
+                `;
+                optsContainer.appendChild(btn);
+            });
+
+            // Gọi MathJax render lại công thức Toán
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('playingScreen')]).catch((err) => console.log(err.message));
+            }
+
+            // Xử lý nút navigation
+            document.getElementById('prevBtn').disabled = currentIdx === 0;
+            
+            if (currentIdx === 19) {
+                document.getElementById('nextBtn').classList.add('hidden');
+                document.getElementById('submitBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('nextBtn').classList.remove('hidden');
+                document.getElementById('submitBtn').classList.add('hidden');
+            }
+        }
+
+        // Chọn đáp án
+        function selectOption(optIndex) {
+            userAnswers[currentIdx] = optIndex;
+            renderQuestion(); // Re-render để cập nhật UI
+        }
+
+        // Điều hướng
+        function nextQuestion() {
+            if (currentIdx < 19) {
+                currentIdx++;
+                renderQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                renderQuestion();
+            }
+        }
+
+        // Nộp bài
+        function submitExamConfirmation() {
+            const unanswered = userAnswers.filter(a => a === null).length;
+            let msg = "Bạn có chắc chắn muốn nộp bài ngay bây giờ?";
+            if (unanswered > 0) {
+                msg = `Bạn còn <b class="text-red-500">${unanswered} câu</b> chưa trả lời.<br>Bạn vẫn muốn nộp bài chứ?`;
+            }
+            document.getElementById('submitModalText').innerHTML = msg;
+            document.getElementById('submitModal').classList.remove('hidden');
+        }
+
+        function closeSubmitModal() {
+            document.getElementById('submitModal').classList.add('hidden');
+        }
+
+        // BIẾN LƯU LINK GOOGLE APPS SCRIPT (BẠN SẼ THAY LINK Ở BƯỚC 2 VÀO ĐÂY)
+        const GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwF2ZRsPhJo4OwoVfVQo8tMIgXDg14-V1QivfIWSDImpcFXQU0DVX5iqITdQRCZduenzg/exec";
+
+        function confirmSubmit() {
+            // Hiển thị trạng thái loading
+            document.getElementById('submitModalContent').classList.add('hidden');
+            document.getElementById('submitLoading').classList.remove('hidden');
+            document.getElementById('submitLoading').classList.add('flex');
+
+            // Tính điểm trước để gửi đi
+            let score = 0;
+            examQuestions.forEach((q, idx) => {
+                if (userAnswers[idx] === q.a) score++;
+            });
+
+            // Nếu đã cấu hình Link Google Sheet thì gửi dữ liệu
+            if (GOOGLE_SHEET_WEB_APP_URL !== "THAY_LINK_CUA_BAN_VAO_DAY" && GOOGLE_SHEET_WEB_APP_URL !== "") {
+                let formData = new URLSearchParams();
+                formData.append("name", studentNameStr);
+                formData.append("className", studentClassStr);
+                formData.append("score", score);
+                formData.append("violations", violations);
+
+                fetch(GOOGLE_SHEET_WEB_APP_URL, {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => {
+                    finishSubmit();
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    finishSubmit(); // Vẫn cho xem điểm dù lỗi mạng
+                });
+            } else {
+                // Nếu chưa cấu hình link thì nhảy thẳng đến xem điểm
+                finishSubmit();
+            }
+        }
+
+        function finishSubmit() {
+            // Khôi phục UI của Modal cho lần sau
+            document.getElementById('submitModalContent').classList.remove('hidden');
+            document.getElementById('submitLoading').classList.add('hidden');
+            document.getElementById('submitLoading').classList.remove('flex');
+            closeSubmitModal();
+            calculateResults();
+        }
+
+        // Tính điểm và hiển thị kết quả
+        function calculateResults() {
+            gameState = 'result';
+            let score = 0;
+            
+            const reviewContainer = document.getElementById('reviewContainer');
+            reviewContainer.innerHTML = '';
+            const labels = ['A', 'B', 'C', 'D'];
+
+            examQuestions.forEach((q, idx) => {
+                const isCorrect = userAnswers[idx] === q.a;
+                if (isCorrect) score++;
+
+                const card = document.createElement('div');
+                card.className = `p-5 rounded-xl border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`;
+                
+                let ansHtml = `<p class="font-medium text-slate-800 mb-2"><b>Câu ${idx+1}:</b> ${q.q}</p>`;
+                
+                ansHtml += `<div class="flex flex-col gap-2 text-sm mt-3 w-full">`;
+                
+                q.o.forEach((optText, oIdx) => {
+                    let styleClass = "p-2 rounded border bg-white text-slate-600";
+                    let icon = "";
+                    
+                    if (oIdx === q.a) { // Correct answer
+                        styleClass = "p-2 rounded border-2 border-green-500 bg-green-100 text-green-800 font-semibold";
+                        icon = `<i class="fa-solid fa-check text-green-600 mr-1"></i>`;
+                    } else if (userAnswers[idx] === oIdx) { // User picked wrong answer
+                        styleClass = "p-2 rounded border-2 border-red-500 bg-red-100 text-red-800";
+                        icon = `<i class="fa-solid fa-xmark text-red-600 mr-1"></i>`;
+                    }
+
+                    ansHtml += `<div class="${styleClass}">${icon} <b>${labels[oIdx]}.</b> ${optText}</div>`;
+                });
+                ansHtml += `</div>`;
+                
+                card.innerHTML = ansHtml;
+                reviewContainer.appendChild(card);
+            });
+
+            // Update UI
+            document.getElementById('playingScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            
+            document.getElementById('finalScore').innerText = score;
+            
+            // Icon based on score
+            let iconStr = "🏆";
+            if(score <= 8) iconStr = "😢";
+            else if(score <= 15) iconStr = "👍";
+            else if(score >= 18) iconStr = "🌟";
+            document.getElementById('scoreIcon').innerText = iconStr;
+
+            // Violations report
+            if (violations > 0) {
+                document.getElementById('finalCheatCount').innerText = violations;
+                document.getElementById('resultWarnings').classList.remove('hidden');
+            }
+
+            document.getElementById('statusBadge').innerHTML = `<i class="fa-solid fa-flag-checkered"></i> Đã hoàn thành`;
+            document.getElementById('statusBadge').className = "bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2";
+
+            // Render Math in results
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('resultScreen')]).catch((err) => console.log(err.message));
+            }
+        }
+    </script>
+</body>
+</html>
